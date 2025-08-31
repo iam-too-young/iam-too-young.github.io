@@ -1,11 +1,10 @@
-const audioList = [];
-const isFixed = Global.theme_config.plugins.aplayer.type == "fixed"
-const isMini = Global.theme_config.plugins.aplayer.type == "mini"
+(function() {
+  const audioList = [];
+  const isFixed = theme.plugins.aplayer.type === "fixed";
+  const isMini = theme.plugins.aplayer.type === "mini";
 
-
-
-for (const audio of Global.theme_config.plugins.aplayer.audios) {
-    const a = {
+  for (const audio of theme.plugins.aplayer.audios) {
+    const audioObj = {
       name: audio.name,
       artist: audio.artist,
       url: audio.url,
@@ -13,20 +12,22 @@ for (const audio of Global.theme_config.plugins.aplayer.audios) {
       lrc: audio.lrc,
       theme: audio.theme,
     };
-    audioList.push(a);
-}
+    audioList.push(audioObj);
+  }
 
-
-if (isMini) {
-  const ap = new APlayer({
-      container: document.getElementById('aplayer'),
+  if (isMini) {
+    new APlayer({
+      container: document.getElementById("aplayer"),
       mini: true,
       audio: audioList,
-  });
-} else if (isFixed) {
-  const ap = new APlayer({
-      container: document.getElementById('aplayer'),
+    });
+  } else if (isFixed) {
+    const player = new APlayer({
+      container: document.getElementById("aplayer"),
       fixed: true,
+      lrcType: 3,
       audio: audioList,
-  });
-}
+    });
+    document.querySelector(".aplayer-icon-lrc").click();
+  }
+})();
