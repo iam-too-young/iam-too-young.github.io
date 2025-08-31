@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
+    
+    <meta name="author" content="iam-too-young">
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://iam-too-young.github.io/blog/2023/08/19/soundcloud逆向/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+        <meta name="description" content="前些日子找到几首比较好听的歌曲，由于这些歌曲在国内找不到，所以只好去SoundCloud里面去找。   以这个网址为例子。老样子，先F12，刷新一下看请求，   发现存在mp3请求，但是这些请求不是单个，而是一连串的，怀疑是有一个播放列表，也就是M3U8，搜了一下，确实有一个playlist.m3u8，看一下请求   (╯°Д°)╯︵ ┻━┻啊？四个加密？ 刚开始看时确实很吓人，不着急，先看看调用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SoundCloud逆向">
+<meta property="og:url" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/index.html">
+<meta property="og:site_name" content="Blog of iam-too-young">
+<meta property="og:description" content="前些日子找到几首比较好听的歌曲，由于这些歌曲在国内找不到，所以只好去SoundCloud里面去找。   以这个网址为例子。老样子，先F12，刷新一下看请求，   发现存在mp3请求，但是这些请求不是单个，而是一连串的，怀疑是有一个播放列表，也就是M3U8，搜了一下，确实有一个playlist.m3u8，看一下请求   (╯°Д°)╯︵ ┻━┻啊？四个加密？ 刚开始看时确实很吓人，不着急，先看看调用">
+<meta property="og:locale">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/1.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/2.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/3.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/4.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/5.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/6.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/7.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/8.png">
+<meta property="og:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/9.png">
+<meta property="article:published_time" content="2023-08-19T06:53:39.000Z">
+<meta property="article:modified_time" content="2023-08-19T07:35:09.012Z">
+<meta property="article:author" content="iamTooYoung">
+<meta property="article:tag" content="python-爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://iam-too-young.github.io/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/1.png">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/blog/images/author-favicon.png" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/author-favicon.png">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/blog/images/author-favicon.png">
+    <!--- Page Info-->
+    
+    <title>
+        
+            SoundCloud逆向 -
+        
+        B l o g
+    </title>
+    
+<link rel="stylesheet" href="/blog/css/style.css">
+
+    
+<link rel="stylesheet" href="/blog/fonts/fonts.css">
+
+    
+<link rel="stylesheet" href="/blog/fonts/Satoshi/satoshi.css">
+
+    
+<link rel="stylesheet" href="/blog/fonts/Chillax/chillax.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+
+    <!--- Inject Part-->
+    
+    <script id="hexo-configurations">
+    let Global = window.Global || {};
+    Global.hexo_config = {"hostname":"iam-too-young.github.io","root":"/blog/","language":"zh"};
+    Global.theme_config = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":false,"lazyload":true,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","secondary":null},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"open_graph":true,"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"My Blog","subtitle":{"text":[],"hitokoto":{"enable":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"links":{"github":"https://github.com/iam-too-young","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null}]},"mermaid":{"enable":false,"version":"9.3.0"}},"version":"2.3.0","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"}},"search":{"enable":false,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":false,"position":"left","first_item":"menu","announcement":null,"links":null},"article_date_format":"auto","categories":{"enable":false,"limit":3},"tags":{"enable":false,"limit":3}},"footerStart":"2022/8/17 11:45:14"};
+    Global.language_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    Global.data_config = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/blog/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/blog/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/blog/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/blog/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+
+    
+        <span class="pjax-progress-bar"></span>
+        <span class="swup-progress-icon">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </span>
+    
+</div>
+
+
+<main class="page-container" id="swup">
+    
+
+    
+
+    <div class="main-content-container">
+        
+
+        <div class="main-content-header">
+            <header class="navbar-container">
+    
+    <div class="navbar-content">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                B l o g
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="" 
+                                    href="/blog/"  >
+                                    
+                                        
+                                            <i class="fa-regular fa-house"></i>
+                                        
+                                        首页
+                                    
+                                </a>
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div class="navbar-drawer">
+        <ul class="drawer-navbar-list">
+            
+                
+                    <li class="drawer-navbar-item flex-center">
+                        <a class="" 
+                        href="/blog/"  >
+                             
+                                
+                                    <i class="fa-regular fa-house"></i>
+                                
+                                首页
+                            
+                        </a>
+                    </li>
+                    <!-- Submenu -->
+                    
+            
+
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="main-content-body">
+
+            
+
+            <div class="main-content">
+
+                
+                    <div class="post-page-container">
+    <div class="article-content-container">
+
+        <div class="article-title">
+            
+                <h1 class="article-title-regular">SoundCloud逆向</h1>
+            
+            </div>
+            
+                    
+        
+        
+            <div class="article-header">
+                <div class="avatar">
+                    <img src="/blog/images/author-logo.png">
+                </div>
+                <div class="info">
+                    <div class="author">
+                        <span class="name">iam-too-young</span>
+                        
+                            <span class="author-label">Lv1</span>
+                        
+                    </div>
+                    <div class="meta-info">
+                        <div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2023-08-19 14:53:39</span>
+        <span class="mobile">2023-08-19 14:53:39</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2023-08-19 15:35:09</span>
+            <span class="mobile">2023-08-19 15:35:09</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/blog/tags/python-%E7%88%AC%E8%99%AB/">python-爬虫</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+                    </div>
+                </div>
+            </div>
+        
+
+        <div class="article-content markdown-body">
+            <p>前些日子找到几首比较好听的歌曲，由于这些歌曲在国内找不到，所以只好去SoundCloud里面去找。</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/1.png"
+                      class=""
+                >
+
+<p>以这个网址为例子。老样子，先F12，刷新一下看请求，</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/2.png"
+                      class=""
+                >
+
+<p>发现存在mp3请求，但是这些请求不是单个，而是一连串的，怀疑是有一个播放列表，也就是M3U8，搜了一下，确实有一个playlist.m3u8，看一下请求</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/3.png"
+                      class=""
+                >
+
+<p><strong>(╯°Д°)╯︵ ┻━┻啊？四个加密？</strong></p>
+<p>刚开始看时确实很吓人，不着急，先看看调用堆栈，发现一个叫做request的函数，点进去看一下</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/4.png"
+                      class=""
+                >
+
+<p>发现url, headers等内容，先打个断点，刷新页面，把鼠标悬在e.url处，得到</p>
+<div class="highlight-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://api-v2.soundcloud.com/media/soundcloud:tracks:708493486/ddf81245-4196-4ea6-a186-8994adc528d3/stream/hls?client_id=Ofttu2XaxjVoOOgyqmEJxI8JCe28jPzW&amp;track_authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnZW8iOiJUVyIsInN1YiI6IiIsInJpZCI6IjIwY2JiMGY1LTgwOTQtNGY5NS05YWU2LTQ4YTE2NDE4ZTgzNCIsImlhdCI6MTY5MjQyNTI0OH0.in5EAPbcYFkB0kWqrjG689dZvS6Fghe6QE57Af6YDec</span><br></pre></td></tr></table></figure></div>
+
+<p>这是一个调用api的链接，有两个参数client_id和track_authorization，在链接里还有其他未知信息</p>
+<p>不着急，先尝试查找client_id的生成，（内心已经做好AES，RSA的准备了），于是乎全局搜索，发现……</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/5.png"
+                      class=""
+                >
+
+<p>client_id是定值？？？刚开始不信，后来再找找，发现client_id怎么看都是定值，所以先不继续探究</p>
+<p>再来看看track_authorization</p>
+<p>依然是全局搜索，但是意外的是，我居然在网页里找到了这个值</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/6.png"
+                      class=""
+                >
+
+<p>再仔细看一下，连api地址都直接写在里面！</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/7.png"
+                      class=""
+                >
+
+<p>只不过api地址后面没有参数，不过api的完整地址的组成就是</p>
+<p>FullURL &#x3D; ApiURL+Client_id+Track_Authorization</p>
+<p>Api和track_authorization都在网页里，而client_id是定值，所以很容易就得到m3u8的请求地址</p>
+<p>用python写出来长这样（利用lxml.etree分析网页）（记得请求时加上User-Agent）</p>
+<div class="highlight-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;https://soundcloud.com/soft-fruits/american-boy-chanel-remix&quot;</span></span><br><span class="line">proxies = &#123;</span><br><span class="line">    <span class="string">&quot;http&quot;</span>: <span class="string">&quot;Your proxy http&quot;</span>,</span><br><span class="line">    <span class="string">&quot;https&quot;</span>: <span class="string">&quot;Your proxy https&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Your User Agent&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">response_obj = requests.get(url, proxies=proxies, headers=headers)</span><br><span class="line">html_obj = etree.HTML(response_obj.text)</span><br><span class="line">script_elements = html_obj.xpath(<span class="string">&quot;//script&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> e <span class="keyword">in</span> script_elements:</span><br><span class="line">    <span class="keyword">if</span> e.text <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> e.text.startswith(<span class="string">&quot;window.__sc_hydration&quot;</span>):</span><br><span class="line">        <span class="comment"># 利用json读取html里面的script数据</span></span><br><span class="line">        data = json.loads(e.text.replace(<span class="string">&quot;window.__sc_hydration = &quot;</span>, <span class="string">&quot;&quot;</span>).replace(<span class="string">&quot;;&quot;</span>, <span class="string">&quot;&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> foo <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;data&quot;</span> <span class="keyword">in</span> foo:</span><br><span class="line">        bar = foo[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;media&quot;</span> <span class="keyword">in</span> bar:</span><br><span class="line">            api_url = bar[<span class="string">&quot;media&quot;</span>][<span class="string">&quot;transcodings&quot;</span>][<span class="number">0</span>][<span class="string">&quot;url&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> foo <span class="keyword">in</span> data:</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;data&quot;</span> <span class="keyword">in</span> foo:</span><br><span class="line">        bar = foo[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;track_authorization&quot;</span> <span class="keyword">in</span> bar:</span><br><span class="line">            track_auth = bar[<span class="string">&quot;track_authorization&quot;</span>]</span><br><span class="line"></span><br><span class="line">json_url = api_url+<span class="string">&quot;?track_authorization=&quot;</span>+track_auth+<span class="string">&quot;&amp;client_id=Ofttu2XaxjVoOOgyqmEJxI8JCe28jPzW&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>这样我们就得到了api的具体地址，在浏览器打开，发现得到</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/8.png"
+                      class=""
+                >
+
+<p>也是个json，url就是我们的m3u8地址，挺奇怪的是，连参数都直接包含在url里了，不过这倒是省了很大的力气，继续请求得到m3u8文件</p>
+<img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/blog/2023/08/19/SoundCloud%E9%80%86%E5%90%91/9.png"
+                      class=""
+                >
+
+<p>接下来再用python分析，下载mp3文件，代码如下</p>
+<div class="highlight-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">m3u8_url = json.loads(requests.get(json_url, headers=headers, proxies=proxies).text)[<span class="string">&quot;url&quot;</span>]</span><br><span class="line">m3u8_file = requests.get(m3u8_url, proxies=proxies, headers=headers).text</span><br><span class="line">mp3_urls = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> m3u8_file.splitlines():</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> line.startswith(<span class="string">&quot;#&quot;</span>):</span><br><span class="line">        mp3_urls.append(line)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;files.txt&quot;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> txtwt:</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(mp3_urls)):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">f&quot;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>.mp3&quot;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> fwt:</span><br><span class="line">            response = requests.get(mp3_urls[i], proxies=proxies, headers=headers)</span><br><span class="line">            <span class="keyword">if</span> response.status_code == <span class="number">200</span>:</span><br><span class="line">                txtwt.write(<span class="string">f&quot;file &#x27;<span class="subst">&#123;i+<span class="number">1</span>&#125;</span>.mp3&#x27;\n&quot;</span>)</span><br><span class="line">                fwt.write(response.content)</span><br></pre></td></tr></table></figure></div>
+
+<p>在上面，我们又生成了一个files.txt，这个是给ffmpeg使用的，用于合并音频</p>
+<div class="highlight-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -f concat -safe 0 -i files.txt -c copy -y medianame.mp3</span><br></pre></td></tr></table></figure></div>
+
+<p>会生成medianame.mp3，这就是最终音频。</p>
+<p>至此，咱们就做到了通过网页直接下载音乐。</p>
+<p>由于整体很简单，大家可以试试！希望给你们带来一些帮助。</p>
+
+        </div>
+
+        
+
+        
+            <ul class="post-tags-box">
+                
+                    <li class="tag-item">
+                        <a href="/blog/tags/python-%E7%88%AC%E8%99%AB/">#python-爬虫</a>&nbsp;
+                    </li>
+                
+            </ul>
+        
+
+        
+
+        
+            <div class="article-nav">
+                
+                
+                    <div class="article-next">
+                        <a class="next"
+                        rel="next"
+                        href="/blog/2023/08/18/Hello-everyone/"
+                        >
+                            <span class="title flex-center">
+                                <span class="post-nav-title-item">这是一篇测试博客</span>
+                                <span class="post-nav-item">下一篇</span>
+                            </span>
+                            <span class="right arrow-icon flex-center">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                
+            </div>
+        
+
+
+        
+    </div>
+
+    
+        <div class="toc-content-container">
+            <div class="post-toc-wrap">
+    <div class="post-toc">
+        <div class="toc-title">此页目录</div>
+        <div class="page-title">SoundCloud逆向</div>
+        
+
+    </div>
+</div>
+        </div>
+    
+</div>
+
+
+
+                
+
+            </div>
+            
+            
+
+        </div>
+
+        <div class="main-content-footer">
+            <footer class="footer">
+    <div class="info-container">
+        <div class="copyright-info">
+            &copy;
+            
+              <span>2022</span>
+              -
+            
+            2023&nbsp;&nbsp;<i class="fa-regular fa-computer-classic"></i>&nbsp;&nbsp;<a href="/">iam-too-young</a>
+        </div>
+        
+            <script data-swup-reload-script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+            <div class="website-count info-item">
+                
+                    <span id="busuanzi_container_site_uv" class="busuanzi_container_site_uv">
+                        访问人数&nbsp;<span id="busuanzi_value_site_uv" class="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="busuanzi_container_site_pv">
+                        总访问量&nbsp;<span id="busuanzi_value_site_pv" class="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="theme-info info-item">
+            <span class="powered-by-container">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" href="https://hexo.io">Hexo</a> 驱动</span>
+                <br>
+            <span class="theme-version-container">主题&nbsp;<a class="theme-version" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.3.0</a></span>
+        </div>
+        
+        
+        
+        
+        
+        
+    </div>  
+</footer>
+        </div>
+    </div>
+
+    
+        <div class="post-tools">
+            <div class="post-tools-container">
+    <ul class="article-tools-list">
+        <!-- TOC aside toggle -->
+        
+            <li class="right-bottom-tools page-aside-toggle">
+                <i class="fa-regular fa-outdent"></i>
+            </li>
+        
+
+        <!-- go comment -->
+        
+    </ul>
+</div>
+
+        </div>
+    
+
+    <div class="right-side-tools-container">
+        <div class="side-tools-container">
+    <ul class="hidden-tools-list">
+        <li class="right-bottom-tools tool-font-adjust-plus flex-center">
+            <i class="fa-regular fa-magnifying-glass-plus"></i>
+        </li>
+
+        <li class="right-bottom-tools tool-font-adjust-minus flex-center">
+            <i class="fa-regular fa-magnifying-glass-minus"></i>
+        </li>
+
+        <li class="right-bottom-tools tool-expand-width flex-center">
+            <i class="fa-regular fa-expand"></i>
+        </li>
+
+        <li class="right-bottom-tools tool-dark-light-toggle flex-center">
+            <i class="fa-regular fa-moon"></i>
+        </li>
+
+        <!-- rss -->
+        
+
+        
+
+        <li class="right-bottom-tools tool-scroll-to-bottom flex-center">
+            <i class="fa-regular fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="visible-tools-list">
+        <li class="right-bottom-tools toggle-tools-list flex-center">
+            <i class="fa-regular fa-cog fa-spin"></i>
+        </li>
+        
+            <li class="right-bottom-tools tool-scroll-to-top flex-center">
+                <i class="arrow-up fas fa-arrow-up"></i>
+                <span class="percent"></span>
+            </li>
+        
+        
+    </ul>
+</div>
+
+    </div>
+
+    <div class="image-viewer-container">
+    <img src="">
+</div>
+
+
+    
+
+
+</main>
+
+
+<script src="/blog/js/libs/Swup.min.js"></script>
+
+<script src="/blog/js/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/blog/js/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/blog/js/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/blog/js/libs/SwupScrollPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+        ],
+        containers: ["#swup"],
+    });
+
+    swup.on("pageView", () => {
+        Global.refresh();
+    });
+
+    // if (document.readyState === "complete") {
+    //
+    // } else {
+    //     document.addEventListener("DOMContentLoaded", () => init());
+    // }
+</script>
+
+
+
+
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/main.js"></script>
+
+<script src="/blog/js/layouts/navbarShrink.js"></script>
+
+<script src="/blog/js/tools/scrollTopBottom.js"></script>
+
+<script src="/blog/js/tools/lightDarkSwitch.js"></script>
+
+<script src="/blog/js/layouts/categoryList.js"></script>
+
+
+
+
+
+    
+<script src="/blog/js/tools/codeBlock.js"></script>
+
+
+
+
+    
+<script src="/blog/js/layouts/lazyload.js"></script>
+
+
+
+
+
+
+  
+<script src="/blog/js/libs/Typed.min.js"></script>
+
+  
+<script src="/blog/js/plugins/typed.js"></script>
+
+
+
+
+
+
+
+<div class="post-scripts" data-swup-reload-script>
+    
+        
+<script src="/blog/js/tools/tocToggle.js"></script>
+
+<script src="/blog/js/layouts/toc.js"></script>
+
+<script src="/blog/js/libs/anime.min.js"></script>
+
+<script src="/blog/js/plugins/tabs.js"></script>
+
+    
+</div>
+
+
+</body>
+</html>
